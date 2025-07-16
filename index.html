@@ -1,0 +1,565 @@
+
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Taxas de Cartão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">💳 Calculadora de Taxas</h1>
+            <p class="text-gray-600">Simule descontos para cartão de crédito, débito e parcelamentos</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Formulário de Entrada -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">1</span>
+                    Dados da Venda
+                </h2>
+
+                <!-- Valor da Venda -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Valor da Venda (R$)</label>
+                    <input type="number" id="valorVenda" placeholder="1000.00" step="0.01" min="0"
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg">
+                </div>
+
+                <!-- Tipo de Pagamento -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de Pagamento</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="selecionarTipo('debito')" id="btn-debito" 
+                                class="tipo-btn px-4 py-3 border-2 border-gray-300 rounded-lg text-center hover:border-blue-500 transition-all">
+                            <div class="text-2xl mb-1">💳</div>
+                            <div class="text-sm font-medium">Débito</div>
+                        </button>
+                        <button onclick="selecionarTipo('credito')" id="btn-credito"
+                                class="tipo-btn px-4 py-3 border-2 border-gray-300 rounded-lg text-center hover:border-blue-500 transition-all">
+                            <div class="text-2xl mb-1">💰</div>
+                            <div class="text-sm font-medium">Crédito à Vista</div>
+                        </button>
+                        <button onclick="selecionarTipo('parcelado')" id="btn-parcelado"
+                                class="tipo-btn px-4 py-3 border-2 border-gray-300 rounded-lg text-center hover:border-blue-500 transition-all">
+                            <div class="text-2xl mb-1">📊</div>
+                            <div class="text-sm font-medium">Parcelado</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Configurações de Parcelamento -->
+                <div id="parcelamento-config" class="mb-6 hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Número de Parcelas</label>
+                    <select id="numParcelas" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <option value="2">2x</option>
+                        <option value="3">3x</option>
+                        <option value="4">4x</option>
+                        <option value="5">5x</option>
+                        <option value="6">6x</option>
+                        <option value="7">7x</option>
+                        <option value="8">8x</option>
+                        <option value="9">9x</option>
+                        <option value="10">10x</option>
+                        <option value="11">11x</option>
+                        <option value="12">12x</option>
+                    </select>
+                </div>
+
+                <!-- Configurações de Taxa -->
+                <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-semibold text-gray-800">⚙️ Configurar Taxas (%)</h3>
+                        <button onclick="salvarTaxas()" 
+                                class="px-3 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600 transition-colors">
+                            💾 Salvar Taxas
+                        </button>
+                    </div>
+                    
+                    <!-- Taxas Básicas -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Taxa Débito</label>
+                            <input type="number" id="taxaDebito" value="2.5" step="0.1" min="0" max="20"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Taxa Crédito</label>
+                            <input type="number" id="taxaCredito" value="3.5" step="0.1" min="0" max="20"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Taxas de Parcelamento -->
+                    <div class="border-t border-gray-200 pt-3 mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">📊 Taxas de Parcelamento</h4>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">2x</label>
+                                <input type="number" id="taxa2x" value="3.8" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">3x</label>
+                                <input type="number" id="taxa3x" value="4.2" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">4x</label>
+                                <input type="number" id="taxa4x" value="4.5" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">5x</label>
+                                <input type="number" id="taxa5x" value="4.8" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">6x</label>
+                                <input type="number" id="taxa6x" value="5.1" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">7x</label>
+                                <input type="number" id="taxa7x" value="5.4" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">8x</label>
+                                <input type="number" id="taxa8x" value="5.7" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">9x</label>
+                                <input type="number" id="taxa9x" value="6.0" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">10x</label>
+                                <input type="number" id="taxa10x" value="6.3" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">11x</label>
+                                <input type="number" id="taxa11x" value="6.6" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">12x</label>
+                                <input type="number" id="taxa12x" value="6.9" step="0.1" min="0" max="20"
+                                       class="w-full px-2 py-1 border border-gray-300 rounded text-xs">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Taxa de Adiantamento -->
+                    <div class="border-t border-gray-200 pt-3">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">⚡ Taxa Adiantamento</label>
+                            <input type="number" id="taxaAdiantamento" value="2.0" step="0.1" min="0" max="10"
+                                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão Calcular -->
+                <button onclick="calcular()" 
+                        class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-4 rounded-lg font-semibold text-lg hover:from-blue-600 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg">
+                    🧮 Calcular Taxas
+                </button>
+            </div>
+
+            <!-- Resultados -->
+            <div class="bg-white rounded-2xl shadow-xl p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                    <span class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm mr-3">2</span>
+                    Resultados
+                </h2>
+
+                <div id="resultados" class="space-y-4">
+                    <div class="text-center text-gray-500 py-8">
+                        <div class="text-4xl mb-2">📊</div>
+                        <p>Preencha os dados e clique em "Calcular Taxas" para ver os resultados</p>
+                    </div>
+                </div>
+
+                <!-- Comparativo -->
+                <div id="comparativo" class="hidden mt-8 p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-3 flex items-center">
+                        <span class="text-green-500 mr-2">💡</span>
+                        Comparativo de Opções
+                    </h3>
+                    <div id="comparativo-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tipoSelecionado = '';
+
+        function selecionarTipo(tipo) {
+            tipoSelecionado = tipo;
+            
+            // Reset visual dos botões
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50');
+                btn.classList.add('border-gray-300');
+            });
+            
+            // Destacar botão selecionado
+            const btnSelecionado = document.getElementById(`btn-${tipo}`);
+            btnSelecionado.classList.remove('border-gray-300');
+            btnSelecionado.classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Mostrar/esconder configurações de parcelamento
+            const parcelamentoConfig = document.getElementById('parcelamento-config');
+            if (tipo === 'parcelado') {
+                parcelamentoConfig.classList.remove('hidden');
+            } else {
+                parcelamentoConfig.classList.add('hidden');
+            }
+        }
+
+        function calcular() {
+            const valorVenda = parseFloat(document.getElementById('valorVenda').value);
+            
+            if (!valorVenda || valorVenda <= 0) {
+                alert('Por favor, insira um valor de venda válido!');
+                return;
+            }
+            
+            if (!tipoSelecionado) {
+                alert('Por favor, selecione um tipo de pagamento!');
+                return;
+            }
+
+            const taxaDebito = parseFloat(document.getElementById('taxaDebito').value);
+            const taxaCredito = parseFloat(document.getElementById('taxaCredito').value);
+            const taxaAdiantamento = parseFloat(document.getElementById('taxaAdiantamento').value);
+
+            let resultados = [];
+            
+            if (tipoSelecionado === 'debito') {
+                const taxa = valorVenda * (taxaDebito / 100);
+                const valorLiquido = valorVenda - taxa;
+                
+                resultados.push({
+                    tipo: 'Débito',
+                    valorBruto: valorVenda,
+                    taxa: taxa,
+                    percentualTaxa: taxaDebito,
+                    valorLiquido: valorLiquido,
+                    prazoRecebimento: '1 dia útil',
+                    icon: '💳'
+                });
+                
+            } else if (tipoSelecionado === 'credito') {
+                const taxa = valorVenda * (taxaCredito / 100);
+                const valorLiquido = valorVenda - taxa;
+                
+                resultados.push({
+                    tipo: 'Crédito à Vista',
+                    valorBruto: valorVenda,
+                    taxa: taxa,
+                    percentualTaxa: taxaCredito,
+                    valorLiquido: valorLiquido,
+                    prazoRecebimento: '30 dias',
+                    icon: '💰'
+                });
+                
+            } else if (tipoSelecionado === 'parcelado') {
+                const numParcelas = parseInt(document.getElementById('numParcelas').value);
+                
+                // Buscar a taxa específica para o número de parcelas
+                const taxaParceladoEspecifica = parseFloat(document.getElementById(`taxa${numParcelas}x`).value);
+                
+                const taxa = valorVenda * (taxaParceladoEspecifica / 100);
+                const valorLiquido = valorVenda - taxa;
+                const valorParcela = valorVenda / numParcelas;
+                const valorParcelaLiquida = valorParcela - (valorParcela * taxaParceladoEspecifica / 100);
+                
+                // Opção 1: Receber parcelado (sem antecipação)
+                resultados.push({
+                    tipo: `Parcelado ${numParcelas}x - Recebimento Normal`,
+                    valorBruto: valorVenda,
+                    taxa: taxa,
+                    percentualTaxa: taxaParceladoEspecifica,
+                    valorLiquido: valorLiquido,
+                    valorParcela: valorParcela,
+                    valorParcelaLiquida: valorParcelaLiquida,
+                    prazoRecebimento: `${numParcelas} meses`,
+                    icon: '📊'
+                });
+                
+                // Opção 2: Antecipação usando a fórmula correta
+                // Cada parcela tem: Taxa do cartão + (Taxa antecipação × número da parcela)
+                
+                let valorTotalAntecipado = 0;
+                let custoTotalAntecipacao = 0;
+                let detalhesAntecipacao = [];
+                
+                for (let parcela = 1; parcela <= numParcelas; parcela++) {
+                    // Valor da parcela bruta
+                    const valorParcela = valorVenda / numParcelas;
+                    
+                    // Taxa do cartão (MDR)
+                    const taxaCartao = valorParcela * (taxaParceladoEspecifica / 100);
+                    
+                    // Taxa de antecipação (multiplicada pelo número da parcela)
+                    const multiplicadorAntecipacao = parcela;
+                    const taxaAntecipacaoParcela = valorParcela * (taxaAdiantamento / 100) * multiplicadorAntecipacao;
+                    
+                    // Valor líquido da parcela
+                    const valorParcelaLiquida = valorParcela - taxaCartao - taxaAntecipacaoParcela;
+                    
+                    valorTotalAntecipado += valorParcelaLiquida;
+                    custoTotalAntecipacao += taxaAntecipacaoParcela;
+                    
+                    detalhesAntecipacao.push(`${parcela}ª parcela: R$ ${valorParcelaLiquida.toFixed(2)} (Taxa cartão: ${taxaParceladoEspecifica}% + Antecipação: ${(taxaAdiantamento * multiplicadorAntecipacao).toFixed(1)}%)`);
+                }
+                
+                const taxaTotal = taxa + custoTotalAntecipacao;
+                
+                resultados.push({
+                    tipo: `Parcelado ${numParcelas}x - Com Antecipação`,
+                    valorBruto: valorVenda,
+                    taxa: taxaTotal,
+                    percentualTaxa: ((taxaTotal / valorVenda) * 100),
+                    valorLiquido: valorTotalAntecipado,
+                    prazoRecebimento: '30 dias (1ª parcela)',
+                    icon: '⚡',
+                    detalhes: `Taxa MDR: R$ ${taxa.toFixed(2)} + Taxa antecipação: R$ ${custoTotalAntecipacao.toFixed(2)}`,
+                    detalhesCompletos: detalhesAntecipacao
+                });
+            }
+
+            exibirResultados(resultados);
+            exibirComparativo();
+        }
+
+        function exibirResultados(resultados) {
+            const container = document.getElementById('resultados');
+            
+            let html = '';
+            
+            resultados.forEach((resultado, index) => {
+                const corCard = index === 0 ? 'border-blue-200 bg-blue-50' : 'border-green-200 bg-green-50';
+                
+                html += `
+                    <div class="border-2 ${corCard} rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="font-semibold text-gray-800 flex items-center">
+                                <span class="mr-2">${resultado.icon}</span>
+                                ${resultado.tipo}
+                            </h3>
+                            <span class="text-sm text-gray-600">${resultado.prazoRecebimento}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-600">Valor Bruto:</span>
+                                <div class="font-semibold text-gray-800">R$ ${resultado.valorBruto.toFixed(2)}</div>
+                            </div>
+                            <div>
+                                <span class="text-gray-600">Taxa (${resultado.percentualTaxa.toFixed(1)}%):</span>
+                                <div class="font-semibold text-red-600">- R$ ${resultado.taxa.toFixed(2)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Valor Líquido:</span>
+                                <span class="text-xl font-bold text-green-600">R$ ${resultado.valorLiquido.toFixed(2)}</span>
+                            </div>
+                        </div>
+                        
+                        ${resultado.valorParcela ? `
+                            <div class="mt-2 text-sm text-gray-600">
+                                <span>Valor por parcela: R$ ${resultado.valorParcela.toFixed(2)}</span>
+                                ${resultado.valorParcelaLiquida ? `<span class="ml-2 text-green-600">(Líquida: R$ ${resultado.valorParcelaLiquida.toFixed(2)})</span>` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        ${resultado.detalhes ? `
+                            <div class="mt-2 text-xs text-gray-500 bg-white p-2 rounded">
+                                ${resultado.detalhes}
+                            </div>
+                        ` : ''}
+                        
+                        ${resultado.detalhesCompletos ? `
+                            <div class="mt-2 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                                <div class="font-medium mb-1">📋 Detalhamento por parcela:</div>
+                                ${resultado.detalhesCompletos.map(detalhe => `<div>• ${detalhe}</div>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function exibirComparativo() {
+            const valorVenda = parseFloat(document.getElementById('valorVenda').value);
+            const taxaDebito = parseFloat(document.getElementById('taxaDebito').value);
+            const taxaCredito = parseFloat(document.getElementById('taxaCredito').value);
+            const taxaAdiantamento = parseFloat(document.getElementById('taxaAdiantamento').value);
+
+            // Calcular todas as opções para comparação
+            const opcoes = [
+                {
+                    nome: 'Débito',
+                    valorLiquido: valorVenda - (valorVenda * taxaDebito / 100),
+                    prazo: '1 dia',
+                    taxa: taxaDebito
+                },
+                {
+                    nome: 'Crédito',
+                    valorLiquido: valorVenda - (valorVenda * taxaCredito / 100),
+                    prazo: '30 dias',
+                    taxa: taxaCredito
+                }
+            ];
+
+            // Adicionar opções de parcelamento com antecipação usando fórmula correta
+            for (let i = 2; i <= 12; i++) {
+                const taxaParcelado = parseFloat(document.getElementById(`taxa${i}x`).value);
+                
+                let valorTotalAntecipado = 0;
+                
+                for (let parcela = 1; parcela <= i; parcela++) {
+                    // Valor da parcela bruta
+                    const valorParcela = valorVenda / i;
+                    
+                    // Taxa do cartão (MDR)
+                    const taxaCartao = valorParcela * (taxaParcelado / 100);
+                    
+                    // Taxa de antecipação (multiplicada pelo número da parcela)
+                    const multiplicadorAntecipacao = parcela;
+                    const taxaAntecipacaoParcela = valorParcela * (taxaAdiantamento / 100) * multiplicadorAntecipacao;
+                    
+                    // Valor líquido da parcela
+                    const valorParcelaLiquida = valorParcela - taxaCartao - taxaAntecipacaoParcela;
+                    
+                    valorTotalAntecipado += valorParcelaLiquida;
+                }
+                
+                opcoes.push({
+                    nome: `${i}x c/ Antecipação`,
+                    valorLiquido: valorTotalAntecipado,
+                    prazo: '1 dia',
+                    taxa: ((valorVenda - valorTotalAntecipado) / valorVenda * 100)
+                });
+            }
+
+            // Ordenar por valor líquido (maior para menor)
+            opcoes.sort((a, b) => b.valorLiquido - a.valorLiquido);
+
+            let html = '<div class="space-y-2 max-h-48 overflow-y-auto">';
+            opcoes.forEach((opcao, index) => {
+                const medalha = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '📊';
+                html += `
+                    <div class="flex justify-between items-center text-sm">
+                        <span>${medalha} ${opcao.nome}</span>
+                        <span class="font-semibold">R$ ${opcao.valorLiquido.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            document.getElementById('comparativo-content').innerHTML = html;
+            document.getElementById('comparativo').classList.remove('hidden');
+        }
+
+        // Calcular automaticamente quando os valores mudarem
+        document.getElementById('valorVenda').addEventListener('input', () => {
+            if (tipoSelecionado && document.getElementById('valorVenda').value) {
+                calcular();
+            }
+        });
+
+        document.getElementById('numParcelas').addEventListener('change', () => {
+            if (tipoSelecionado === 'parcelado' && document.getElementById('valorVenda').value) {
+                calcular();
+            }
+        });
+
+        // Função para salvar taxas no localStorage
+        function salvarTaxas() {
+            const taxas = {
+                taxaDebito: document.getElementById('taxaDebito').value,
+                taxaCredito: document.getElementById('taxaCredito').value,
+                taxa2x: document.getElementById('taxa2x').value,
+                taxa3x: document.getElementById('taxa3x').value,
+                taxa4x: document.getElementById('taxa4x').value,
+                taxa5x: document.getElementById('taxa5x').value,
+                taxa6x: document.getElementById('taxa6x').value,
+                taxa7x: document.getElementById('taxa7x').value,
+                taxa8x: document.getElementById('taxa8x').value,
+                taxa9x: document.getElementById('taxa9x').value,
+                taxa10x: document.getElementById('taxa10x').value,
+                taxa11x: document.getElementById('taxa11x').value,
+                taxa12x: document.getElementById('taxa12x').value,
+                taxaAdiantamento: document.getElementById('taxaAdiantamento').value
+            };
+            
+            localStorage.setItem('taxasCartao', JSON.stringify(taxas));
+            
+            // Feedback visual
+            const btn = event.target;
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '✅ Taxas Salvas!';
+            btn.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                btn.innerHTML = textoOriginal;
+                btn.classList.remove('bg-green-600');
+            }, 2000);
+        }
+
+        // Carregar taxas salvas ao inicializar
+        function carregarTaxas() {
+            const taxasSalvas = localStorage.getItem('taxasCartao');
+            if (taxasSalvas) {
+                const taxas = JSON.parse(taxasSalvas);
+                document.getElementById('taxaDebito').value = taxas.taxaDebito || '2.5';
+                document.getElementById('taxaCredito').value = taxas.taxaCredito || '3.5';
+                document.getElementById('taxa2x').value = taxas.taxa2x || '3.8';
+                document.getElementById('taxa3x').value = taxas.taxa3x || '4.2';
+                document.getElementById('taxa4x').value = taxas.taxa4x || '4.5';
+                document.getElementById('taxa5x').value = taxas.taxa5x || '4.8';
+                document.getElementById('taxa6x').value = taxas.taxa6x || '5.1';
+                document.getElementById('taxa7x').value = taxas.taxa7x || '5.4';
+                document.getElementById('taxa8x').value = taxas.taxa8x || '5.7';
+                document.getElementById('taxa9x').value = taxas.taxa9x || '6.0';
+                document.getElementById('taxa10x').value = taxas.taxa10x || '6.3';
+                document.getElementById('taxa11x').value = taxas.taxa11x || '6.6';
+                document.getElementById('taxa12x').value = taxas.taxa12x || '6.9';
+                document.getElementById('taxaAdiantamento').value = taxas.taxaAdiantamento || '2.0';
+            }
+        }
+
+        // Carregar taxas ao inicializar a página
+        window.addEventListener('load', carregarTaxas);
+
+        // Recalcular quando as taxas mudarem
+        ['taxaDebito', 'taxaCredito', 'taxa2x', 'taxa3x', 'taxa4x', 'taxa5x', 'taxa6x', 'taxa7x', 'taxa8x', 'taxa9x', 'taxa10x', 'taxa11x', 'taxa12x', 'taxaAdiantamento'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => {
+                if (tipoSelecionado && document.getElementById('valorVenda').value) {
+                    calcular();
+                }
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95c2b2d7b21701b0',t:'MTc1MjAxMDM5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
